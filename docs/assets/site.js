@@ -2,7 +2,7 @@
   const qs=(s,r=document)=>r.querySelector(s), qsa=(s,r=document)=>Array.from(r.querySelectorAll(s));
   const menu=qs('[data-menu]'), nav=qs('[data-nav]');
   if(menu&&nav) menu.addEventListener('click',()=>{const open=nav.classList.toggle('open');menu.setAttribute('aria-expanded',String(open));});
-  qsa('[data-detail]').forEach(b=>b.addEventListener('click',()=>b.closest('.activity-card').classList.toggle('open')));
+  qsa('[data-detail]').forEach(b=>{b.setAttribute('aria-expanded','false');b.addEventListener('click',()=>{const card=b.closest('.activity-card'),open=card.classList.toggle('open');b.setAttribute('aria-expanded',String(open));b.textContent=open?'Masquer l’adaptation −':'Voir l’adaptation +';});});
 
   function filterCards(kind){
     const box=qs(`[data-${kind}-filters]`); if(!box)return;
