@@ -14,7 +14,50 @@
   filterCards('venue');filterCards('activity');
 
   const planner=qs('[data-planner]');
-  if(planner){const energy=qs('[name="energy"]',planner), value=qs('[data-energy]',planner), main=qs('[data-main-activity]',planner), weatherBtns=qsa('[data-weather]',planner);let weather='sun';function render(){value.textContent=energy.value+'/5';const high=Number(energy.value)>=4;main.textContent=high?(weather==='sun'?'Grande sortie':'Activité dynamique couverte'):(weather==='sun'?'Balade courte':'Atelier tranquille');}energy.addEventListener('input',render);weatherBtns.forEach(b=>b.addEventListener('click',()=>{weather=b.dataset.weather;weatherBtns.forEach(x=>x.classList.toggle('active',x===b));render();}));render();}
+  if(planner){
+    const ideas={
+      matin:[
+        {t:'Balade sensorielle',d:'Parcours court, banc repéré et collecte de sons ou de couleurs.',w:['soleil'],e:[1,3],m:['calme','equilibre'],r:['sur-place','proche'],c:'soft'},
+        {t:'Marché en mission-photo',d:'Petite liste, rôles choisis et retour possible avant le groupe.',w:['soleil','pluie'],e:[2,4],m:['equilibre','elan'],r:['proche','mobile'],c:'choice'},
+        {t:'Baignade accompagnée',d:'Créneau calme, durée annoncée et option de rester au bord.',w:['soleil','chaleur'],e:[3,5],m:['equilibre','elan'],r:['proche','mobile'],c:'active'},
+        {t:'Atelier cuisine fraîche',d:'Recette imagée, postes courts et dégustation sans obligation.',w:['pluie','chaleur'],e:[2,4],m:['calme','equilibre'],r:['sur-place'],c:'soft'},
+        {t:'Visite à petites étapes',d:'Trois points d’intérêt, pause prévue et audioguide si utile.',w:['soleil','pluie','chaleur'],e:[2,4],m:['calme','equilibre'],r:['proche','mobile'],c:'choice'},
+        {t:'Défi d’orientation',d:'Binômes choisis, boucle courte et balises visuelles simples.',w:['soleil'],e:[4,5],m:['elan'],r:['proche','mobile'],c:'active'},
+        {t:'Café-jeux du quartier',d:'Table réservée, règles démontrées et droit de regarder d’abord.',w:['pluie','chaleur'],e:[1,3],m:['calme','equilibre'],r:['proche'],c:'soft'}
+      ],
+      recuperation:[
+        {t:'Sieste, musique ou terrasse',d:'Trois espaces identifiés, aucune sollicitation sociale obligatoire.',w:['soleil','pluie','chaleur'],e:[1,5],m:['calme','equilibre','elan'],r:['sur-place','proche','mobile'],c:'pause'},
+        {t:'Pause fraîcheur',d:'Boisson, pièce tempérée, brumisation et reprise décidée ensemble.',w:['chaleur'],e:[1,5],m:['calme','equilibre','elan'],r:['sur-place'],c:'pause'},
+        {t:'Carnet de voyage',d:'Photos, collage ou dictée à un tiers, seul ou à deux.',w:['soleil','pluie','chaleur'],e:[1,3],m:['calme'],r:['sur-place'],c:'soft'},
+        {t:'Temps libre balisé',d:'Options visibles, professionnel disponible et heure de retour connue.',w:['soleil','pluie','chaleur'],e:[2,5],m:['equilibre','elan'],r:['sur-place','proche'],c:'choice'},
+        {t:'Salon calme partagé',d:'Lecture, casque, puzzle ou présence silencieuse dans le même espace.',w:['pluie','chaleur'],e:[1,2],m:['calme'],r:['sur-place'],c:'pause'}
+      ],
+      'apres-midi':[
+        {t:'Ferme ou jardin',d:'Contact choisi avec le vivant, tâches concrètes et zone de retrait.',w:['soleil'],e:[2,4],m:['calme','equilibre'],r:['proche','mobile'],c:'soft'},
+        {t:'Arts plastiques grand format',d:'Matériel préparé, gestes libres et résultat non évalué.',w:['pluie','chaleur'],e:[1,4],m:['calme','equilibre'],r:['sur-place'],c:'soft'},
+        {t:'Sport adapté par ateliers',d:'Trois niveaux d’engagement, score facultatif et pauses visibles.',w:['soleil','pluie'],e:[3,5],m:['equilibre','elan'],r:['sur-place','proche'],c:'active'},
+        {t:'Musée avec défi-image',d:'Cinq œuvres maximum, consigne concrète et café de sortie.',w:['pluie','chaleur'],e:[2,4],m:['calme','equilibre'],r:['proche','mobile'],c:'choice'},
+        {t:'Nautisme découverte',d:'Prestataire briefé, équipement essayé et rôle à terre valorisé.',w:['soleil'],e:[4,5],m:['elan'],r:['mobile'],c:'active'},
+        {t:'Goûter en ville',d:'Menu préparé, budget visible et possibilité de commander avec aide.',w:['soleil','pluie','chaleur'],e:[2,4],m:['equilibre','elan'],r:['proche','mobile'],c:'choice'},
+        {t:'Jeux coopératifs',d:'Équipes petites, rôles utiles et objectif commun sans élimination.',w:['soleil','pluie','chaleur'],e:[2,5],m:['equilibre','elan'],r:['sur-place','proche'],c:'active'},
+        {t:'Pétanque aménagée',d:'Distance modulée, partenaire de lancer et espace ombragé.',w:['soleil'],e:[1,3],m:['calme','equilibre'],r:['sur-place','proche'],c:'soft'}
+      ],
+      soiree:[
+        {t:'Cinéma avec sortie facile',d:'Place en bordée, synopsis annoncé et retour anticipé possible.',w:['soleil','pluie','chaleur'],e:[2,4],m:['calme','equilibre'],r:['proche','mobile'],c:'soft'},
+        {t:'Bal dansant à intensité libre',d:'Coin calme, participation par morceaux et départ en deux horaires.',w:['soleil','pluie'],e:[3,5],m:['equilibre','elan'],r:['sur-place','proche','mobile'],c:'active'},
+        {t:'Veillée histoires et musique',d:'Chacun propose, écoute ou se retire ; fin annoncée à l’avance.',w:['soleil','pluie','chaleur'],e:[1,3],m:['calme','equilibre'],r:['sur-place'],c:'soft'},
+        {t:'Promenade au coucher du soleil',d:'Boucle très courte, repères lumineux et boisson au retour.',w:['soleil'],e:[2,4],m:['calme','equilibre'],r:['sur-place','proche'],c:'soft'},
+        {t:'Karaoké en petit comité',d:'Playlist choisie, droit au duo et volume ajustable.',w:['pluie','chaleur'],e:[3,5],m:['equilibre','elan'],r:['sur-place','proche'],c:'active'},
+        {t:'Jeux de société au choix',d:'Table calme, table rapide ou simple observation avec boisson.',w:['soleil','pluie','chaleur'],e:[1,4],m:['calme','equilibre'],r:['sur-place'],c:'choice'}
+      ]
+    };
+    const energy=qs('[name="energy"]',planner),value=qs('[data-energy]',planner),mood=qs('[name="mood"]',planner),reach=qs('[name="reach"]',planner),choices=qs('[name="choices"]',planner),weatherBtns=qsa('[data-weather]',planner),summary=qs('[data-plan-summary]',planner);let weather='soleil',seed=0;
+    const labels={soleil:'soleil',pluie:'pluie',chaleur:'forte chaleur',calme:'besoin de calme',equilibre:'rythme équilibré',elan:'envie d’élan'};
+    function pick(slot,offset,energyValue=Number(energy.value),moodValue=mood.value,excludedTitle){const ranked=ideas[slot].filter(idea=>idea.t!==excludedTitle).map(idea=>{const gap=energyValue<idea.e[0]?idea.e[0]-energyValue:energyValue>idea.e[1]?energyValue-idea.e[1]:0;return{idea,score:(idea.w.includes(weather)?5:0)+(idea.m.includes(moodValue)?3:0)+(idea.r.includes(reach.value)?3:0)-gap*2};}).sort((a,b)=>b.score-a.score||a.idea.t.localeCompare(b.idea.t));const best=ranked.slice(0,Math.min(4,ranked.length));return best[(seed+offset)%best.length].idea;}
+    function fill(slot,idea){const row=qs(`[data-plan-row="${slot}"]`,planner),title=qs('[data-plan-title]',row),detail=qs('[data-plan-detail]',row);title.className=`pace-${idea.c}`;title.textContent=idea.t;detail.textContent=idea.d;}
+    function render(){const n=Number(energy.value),morning=pick('matin',0),recovery=pick('recuperation',1),afternoon=pick('apres-midi',2),alternative=pick('apres-midi',3,Math.max(1,n-1),mood.value==='elan'?'equilibre':'calme',afternoon.t),evening=pick('soiree',4,Math.max(1,n-1));value.textContent=n+'/5';summary.textContent=`Paramètres : énergie ${n}/5 · ${labels[weather]} · ${labels[mood.value]}.`;fill('matin',morning);fill('recuperation',recovery);fill('soiree',evening);if(choices.checked){fill('apres-midi',{...afternoon,t:`${afternoon.t} ou ${alternative.t}`,d:`Deux départs possibles : ${afternoon.d} Alternative : ${alternative.d}`});}else fill('apres-midi',afternoon);}
+    energy.addEventListener('input',render);mood.addEventListener('change',render);reach.addEventListener('change',render);choices.addEventListener('change',render);weatherBtns.forEach(button=>button.addEventListener('click',()=>{weather=button.dataset.weather;weatherBtns.forEach(item=>{const active=item===button;item.classList.toggle('active',active);item.setAttribute('aria-pressed',String(active));});render();}));qs('[data-refresh-plan]',planner).addEventListener('click',()=>{seed++;render();});render();
+  }
 
   const checklist=qs('[data-checklist]');
   if(checklist){const boxes=qsa('input[type="checkbox"]',checklist), pct=qs('[data-check-pct]'), bar=qs('[data-check-bar]'), state=JSON.parse(localStorage.getItem('vao-static-checks')||'[]');boxes.forEach((b,i)=>{b.checked=state.includes(i);b.addEventListener('change',save);});function save(){const done=boxes.map((b,i)=>b.checked?i:null).filter(i=>i!==null);localStorage.setItem('vao-static-checks',JSON.stringify(done));const p=Math.round(done.length/boxes.length*100);pct.textContent=p+'%';bar.style.width=p+'%';}const reset=qs('[data-check-reset]');if(reset)reset.addEventListener('click',()=>{boxes.forEach(b=>b.checked=false);save();});const print=qs('[data-print]');if(print)print.addEventListener('click',()=>window.print());save();}
